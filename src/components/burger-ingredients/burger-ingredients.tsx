@@ -1,14 +1,29 @@
-import { useState, useRef, useEffect, FC } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-
-import { TTabMode, TIngredient } from '@utils-types'; // Импортируем типы
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { TIngredient, TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '@ui';
 
 export const BurgerIngredients: FC = () => {
-  /** TODO: взять переменные из стора */
-  const buns: TIngredient[] = []; // Явно указываем тип
-  const mains: TIngredient[] = []; // Явно указываем тип
-  const sauces: TIngredient[] = []; // Явно указываем тип
+  const dispatch = useDispatch();
+  const { ingredients, isLoading, error } = useSelector(
+    (state) => state.ingredients
+  );
+
+  useEffect(() => {
+    dispatch(fetchIngredients());
+  }, [dispatch]);
+
+  const buns: TIngredient[] = ingredients.filter(
+    (ingredient: { type: string }) => ingredient.type === 'bun'
+  );
+  const mains: TIngredient[] = ingredients.filter(
+    (ingredient: { type: string }) => ingredient.type === 'main'
+  );
+  const sauces: TIngredient[] = ingredients.filter(
+    (ingredient: { type: string }) => ingredient.type === 'sauce'
+  );
 
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);
@@ -46,6 +61,14 @@ export const BurgerIngredients: FC = () => {
     if (tab === 'sauce')
       titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  if (isLoading) {
+    return <p>Загрузка...</p>;
+  }
+
+  if (error) {
+    return <p>Ошибка: {error}</p>;
+  }
 
   return (
     <BurgerIngredientsUI
