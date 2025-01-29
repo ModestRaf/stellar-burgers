@@ -28,7 +28,8 @@ export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
           <p className={`text text_type_main-default ${styles.text}`}>{name}</p>
         </Link>
         <AddButton
-          onClick={() => handleAdd(ingredient)}
+          text='Добавить'
+          onClick={handleAdd}
           extraClass={`${styles.addButton} mt-8`}
         />
       </li>

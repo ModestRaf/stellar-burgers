@@ -1,25 +1,16 @@
 import { FC, useMemo } from 'react';
-import { TConstructorIngredient, TIngredient } from '@utils-types';
+import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
+import { useSelector } from '../../services/store';
 
 export const BurgerConstructor: FC = () => {
-  // Инициализация constructorItems
-  const constructorItems = {
-    bun: null as TIngredient | null, // Булка может быть TIngredient или null
-    ingredients: [] as TConstructorIngredient[] // Начинка
-  };
-
+  const { constructorItems } = useSelector((state) => state.newOrder);
   const orderRequest = false;
   const orderModalData = null;
-
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
-    // Логика оформления заказа
   };
-
-  const closeOrderModal = () => {
-    // Логика закрытия модального окна
-  };
+  const closeOrderModal = () => {};
 
   const price = useMemo(
     () =>

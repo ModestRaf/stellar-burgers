@@ -19,7 +19,6 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   closeOrderModal
 }) => (
   <section className={styles.burger_constructor}>
-    {/* Верхняя булка */}
     {constructorItems.bun ? (
       <div className={`${styles.element} mb-4 mr-4`}>
         <ConstructorElement
@@ -34,10 +33,9 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
       <div
         className={`${styles.noBuns} ${styles.noBunsTop} ml-8 mb-4 mr-5 text text_type_main-default`}
       >
-        Выберите булку
+        Выберите булки
       </div>
     )}
-    {/* Начинка */}
     <ul className={styles.elements}>
       {constructorItems.ingredients.length > 0 ? (
         constructorItems.ingredients.map(
@@ -58,7 +56,6 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         </div>
       )}
     </ul>
-    {/* Нижняя булка */}
     {constructorItems.bun ? (
       <div className={`${styles.element} mt-4 mr-4`}>
         <ConstructorElement
@@ -73,7 +70,7 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
       <div
         className={`${styles.noBuns} ${styles.noBunsBottom} ml-8 mb-4 mr-5 text text_type_main-default`}
       >
-        Выберите булку
+        Выберите булки
       </div>
     )}
     <div className={`${styles.total} mt-10 mr-4`}>
@@ -89,11 +86,13 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         onClick={onOrderClick}
       />
     </div>
+
     {orderRequest && (
       <Modal onClose={closeOrderModal} title={'Оформляем заказ...'}>
         <Preloader />
       </Modal>
     )}
+
     {orderModalData && (
       <Modal
         onClose={closeOrderModal}

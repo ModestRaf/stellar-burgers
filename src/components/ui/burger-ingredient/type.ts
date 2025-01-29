@@ -5,5 +5,5 @@ export type TBurgerIngredientUIProps = {
   ingredient: TIngredient;
   count: number;
   locationState: { background: Location };
-  handleAdd: (ingredient: TIngredient) => void; // Добавлено
+  handleAdd: () => void;
 };

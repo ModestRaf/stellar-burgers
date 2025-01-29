@@ -1,14 +1,15 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import {
   TypedUseSelectorHook,
   useDispatch as dispatchHook,
   useSelector as selectorHook
 } from 'react-redux';
-import { ingredientsReducer } from './slices/ingredientsSlice';
+import ingredientsReducer from './slices/ingredientsSlice';
+import newOrderReducer from './slices/orderSlice';
 
-// Используем combineReducers для создания rootReducer
-const rootReducer = combineReducers({
-  ingredients: ingredientsReducer
+export const rootReducer = combineReducers({
+  ingredients: ingredientsReducer,
+  newOrder: newOrderReducer
 });
 
 const store = configureStore({
