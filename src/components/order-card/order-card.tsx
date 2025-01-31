@@ -1,47 +1,46 @@
-import { FC, memo, useMemo } from 'react';
+import { FC, memo, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { OrderCardProps } from './type';
 import { TIngredient } from '@utils-types';
 import { OrderCardUI } from '@ui';
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 
 const maxIngredients = 6;
 
 export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const location = useLocation();
+  const dispatch = useDispatch();
 
-  /** TODO: взять переменную из стора */
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
+  const isLoading = useSelector((state) => state.ingredients.isLoading);
+
+  useEffect(() => {
+    if (!ingredients.length && !isLoading) {
+      dispatch(fetchIngredients());
+    }
+  }, [dispatch, ingredients.length, isLoading]);
 
   const orderInfo = useMemo(() => {
     if (!ingredients.length) return null;
 
-    const ingredientsInfo = order.ingredients.reduce(
-      (acc: TIngredient[], item: string) => {
-        const ingredient = ingredients.find((ing) => ing._id === item);
-        if (ingredient) return [...acc, ingredient];
-        return acc;
-      },
-      []
+    const ingredientMap = new Map(
+      ingredients.map((ingredient) => [ingredient._id, ingredient])
     );
+
+    const ingredientsInfo = order.ingredients
+      .map((id) => ingredientMap.get(id))
+      .filter(Boolean) as TIngredient[];
 
     const total = ingredientsInfo.reduce((acc, item) => acc + item.price, 0);
 
-    const ingredientsToShow = ingredientsInfo.slice(0, maxIngredients);
-
-    const remains =
-      ingredientsInfo.length > maxIngredients
-        ? ingredientsInfo.length - maxIngredients
-        : 0;
-
-    const date = new Date(order.createdAt);
     return {
       ...order,
       ingredientsInfo,
-      ingredientsToShow,
-      remains,
+      ingredientsToShow: ingredientsInfo.slice(0, maxIngredients),
+      remains: Math.max(0, ingredientsInfo.length - maxIngredients),
       total,
-      date
+      date: new Date(order.createdAt)
     };
   }, [order, ingredients]);
 

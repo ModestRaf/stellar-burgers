@@ -10,7 +10,7 @@ export const Login: FC = () => {
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     try {
-      await login(email, password); // Вызов авторизации
+      await login(email, password);
       console.log('Успешный вход!');
     } catch (error) {
       console.error('Ошибка входа:', error);
