@@ -3,7 +3,8 @@ import {
   createSlice,
   nanoid,
   isPending,
-  isRejected
+  isRejected,
+  PayloadAction
 } from '@reduxjs/toolkit';
 import { getOrdersApi, orderBurgerApi } from '@api';
 import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
@@ -56,6 +57,13 @@ const orderSlice = createSlice({
         ? (state.constructorItems.bun = newIngredient)
         : state.constructorItems.ingredients.push(newIngredient);
     },
+    deleteIngredient: (state, { payload: index }: PayloadAction<number>) => {
+      const { ingredients } = state.constructorItems;
+      if (!ingredients[index]) {
+        throw new Error('Error');
+      }
+      state.constructorItems.ingredients = ingredients.toSpliced(index, 1);
+    },
     closeOrder: (state) => {
       Object.assign(state, initialState);
     }
@@ -84,5 +92,6 @@ const orderSlice = createSlice({
   }
 });
 
-export const { addIngredient, closeOrder } = orderSlice.actions;
+export const { addIngredient, closeOrder, deleteIngredient } =
+  orderSlice.actions;
 export default orderSlice.reducer;
