@@ -14,7 +14,6 @@ export const Login: FC = () => {
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     const resultAction = await dispatch(login({ email, password }));
-    console.log('Ответ от API:', resultAction);
     if (login.fulfilled.match(resultAction)) {
       navigate(
         state?.locationState?.background?.pathname

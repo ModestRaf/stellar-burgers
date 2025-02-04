@@ -29,13 +29,13 @@ const ingredientsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchIngredients.fulfilled, (state, action) => {
+      .addCase(fetchIngredients.fulfilled, (state, { payload }) => {
         state.isLoading = false;
-        state.ingredients = action.payload;
+        state.ingredients = payload;
       })
-      .addCase(fetchIngredients.rejected, (state, action) => {
+      .addCase(fetchIngredients.rejected, (state, { error }) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Ошибка загрузки ингредиентов';
+        state.error = error.message || 'Ошибка загрузки ингредиентов';
       });
   }
 });

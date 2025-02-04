@@ -46,6 +46,14 @@ const App = () => (
       <Routes>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
+        <Route
+          path='/feed/:number'
+          element={
+            <ModalWithNavigation title='Детали заказа'>
+              <OrderInfo />
+            </ModalWithNavigation>
+          }
+        />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
@@ -62,7 +70,6 @@ const App = () => (
             }
           />
         </Route>
-        {/* Модалка ингредиента */}
         <Route
           path='/ingredients/:id'
           element={
@@ -71,7 +78,6 @@ const App = () => (
             </ModalWithNavigation>
           }
         />
-        {/* 404 */}
         <Route path='*' element={<NotFound404 />} />
       </Routes>
     </div>

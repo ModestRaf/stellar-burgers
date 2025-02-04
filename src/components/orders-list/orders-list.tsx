@@ -7,7 +7,5 @@ export const OrdersList: FC<OrdersListProps> = memo(({ orders }) => {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  console.log('Orders in OrdersList:', orderByDate);
-
   return <OrdersListUI orderByDate={orderByDate} />;
 });

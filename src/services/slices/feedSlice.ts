@@ -22,10 +22,7 @@ const initialState: TFeedState = {
   orders: []
 };
 
-export const fetchFeed = createAsyncThunk(
-  'feed/fetchFeed',
-  async () => await getFeedsApi()
-);
+export const fetchFeed = createAsyncThunk('feed/fetchFeed', getFeedsApi);
 
 const feedSlice = createSlice({
   name: 'feed',
@@ -37,11 +34,11 @@ const feedSlice = createSlice({
         state.isLoading = true;
         state.isError = false;
       })
-      .addCase(fetchFeed.fulfilled, (state, action) => {
+      .addCase(fetchFeed.fulfilled, (state, { payload }) => {
         state.isLoading = false;
-        state.feed.total = action.payload.total;
-        state.feed.totalToday = action.payload.totalToday;
-        state.orders = action.payload.orders;
+        state.feed.total = payload.total;
+        state.feed.totalToday = payload.totalToday;
+        state.orders = payload.orders;
       })
       .addCase(fetchFeed.rejected, (state) => {
         state.isLoading = false;

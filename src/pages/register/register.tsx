@@ -14,11 +14,9 @@ export const Register: FC = () => {
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
-    console.log('Отправка данных:', { email, name: userName, password });
     const resultAction = await dispatch(
       register({ email, name: userName, password })
     );
-    console.log('Ответ от API:', resultAction);
     if (register.fulfilled.match(resultAction)) {
       navigate(state?.locationState?.background?.pathname || '/');
     }

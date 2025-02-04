@@ -1,84 +1,88 @@
-import { orderBurgerApi } from '@api';
 import {
-  PayloadAction,
   createAsyncThunk,
   createSlice,
-  nanoid
+  nanoid,
+  isPending,
+  isRejected
 } from '@reduxjs/toolkit';
+import { getOrdersApi, orderBurgerApi } from '@api';
 import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 
-type TNewOrderState = {
+type TConstructorState = {
+  bun: TConstructorIngredient | null;
+  ingredients: TConstructorIngredient[];
+};
+
+type TOrdersState = {
+  orders: TOrder[];
   isLoading: boolean;
-  isError: boolean;
-  constructorItems: {
-    bun: TConstructorIngredient | null;
-    ingredients: TConstructorIngredient[];
-  };
+  error: string | null;
+};
+
+type TOrderState = {
+  constructorItems: TConstructorState;
   orderRequest: boolean;
   orderModalData: TOrder | null;
+  userOrders: TOrdersState;
 };
 
-const initialState: TNewOrderState = {
-  isLoading: false,
-  isError: false,
-  constructorItems: {
-    bun: null,
-    ingredients: []
-  },
+const initialState: TOrderState = {
+  constructorItems: { bun: null, ingredients: [] },
   orderRequest: false,
-  orderModalData: null
+  orderModalData: null,
+  userOrders: { orders: [], isLoading: false, error: null }
 };
 
-export const orderBurger = createAsyncThunk(
-  'newOrder/orderBurger',
-  async (data: string[]) => await orderBurgerApi(data)
+export const orderBurger = createAsyncThunk<TOrder, string[]>(
+  'order/orderBurger',
+  async (data) => (await orderBurgerApi(data)).order
 );
 
-export const orderSlice = createSlice({
-  name: 'newOrder',
+export const fetchUserOrders = createAsyncThunk<TOrder[], void>(
+  'order/fetchUserOrders',
+  async () => await getOrdersApi()
+);
+
+const orderSlice = createSlice({
+  name: 'order',
   initialState,
-  selectors: {
-    getNewOrderData: (state) =>
-      state.constructorItems.bun?._id
-        ? [
-            state.constructorItems.bun._id,
-            ...state.constructorItems.ingredients.map((item) => item._id),
-            state.constructorItems.bun._id
-          ]
-        : []
-  },
   reducers: {
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      action.payload.type !== 'bun'
-        ? (state.constructorItems.ingredients = [
-            ...state.constructorItems.ingredients,
-            { ...action.payload, id: action.payload._id }
-          ])
-        : (state.constructorItems.bun = {
-            ...action.payload,
-            id: nanoid()
-          });
+    addIngredient: (state, { payload }: { payload: TIngredient }) => {
+      const newIngredient = {
+        ...payload,
+        id: payload.type === 'bun' ? nanoid() : payload._id
+      };
+      payload.type === 'bun'
+        ? (state.constructorItems.bun = newIngredient)
+        : state.constructorItems.ingredients.push(newIngredient);
+    },
+    closeOrder: (state) => {
+      Object.assign(state, initialState);
     }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(orderBurger.pending, (state) => {
-        state.orderRequest = state.isLoading = true;
-        state.isError = false;
-        state.orderModalData = null;
+      .addCase(orderBurger.fulfilled, (state, { payload }) => {
+        state.orderRequest = false;
+        state.orderModalData = payload;
       })
-      .addCase(orderBurger.fulfilled, (state, action) => {
-        state.orderRequest = state.isLoading = false;
-        state.orderModalData = action.payload.order;
+      .addCase(fetchUserOrders.fulfilled, (state, { payload }) => {
+        console.log('Orders fetched successfully:', payload);
+        state.userOrders.isLoading = false;
+        state.userOrders.orders = payload;
       })
-      .addCase(orderBurger.rejected, (state) => {
-        state.orderRequest = state.isLoading = false;
-        state.isError = true;
-        state.orderModalData = null;
+      .addMatcher(isPending(orderBurger, fetchUserOrders), (state) => {
+        state.orderRequest = true;
+        state.userOrders.isLoading = true;
+      })
+      .addMatcher(isRejected(orderBurger, fetchUserOrders), (state, action) => {
+        state.orderRequest = false;
+        state.userOrders.isLoading = false;
+        state.userOrders.error =
+          action.error.message || 'Ошибка при получении заказов';
       });
   }
 });
 
-export const { addIngredient } = orderSlice.actions;
-
+export const { addIngredient, closeOrder } = orderSlice.actions;
 export default orderSlice.reducer;
