@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
-import { useSelector } from './store';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCookie } from '../utils/cookie';
+import { AppDispatch, RootState } from './store';
+import { getUserData } from './slices/userSlice';
 
 interface ProtectedRouteProps {
   onlyUnAuth?: boolean;
   redirectTo?: string;
 }
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   onlyUnAuth = false,
-  redirectTo = '/login'
+  redirectTo = '/'
 }) => {
   const location = useLocation();
-  const { user } = useSelector((state) => state.user);
-  if (onlyUnAuth && user) {
-    return <Navigate to='/' replace state={{ from: location }} />;
+  const dispatch: AppDispatch = useDispatch();
+  const { user, isLoading } = useSelector((state: RootState) => state.user);
+  const accessToken = getCookie('accessToken');
+  useEffect(() => {
+    if (accessToken && !user && !isLoading) {
+      dispatch(getUserData());
+    }
+  }, [accessToken, user, isLoading, dispatch]);
+  if (onlyUnAuth && (user || accessToken)) {
+    const from = location.state?.from?.pathname || '/profile';
+    return <Navigate to={from} replace />;
   }
-  if (!onlyUnAuth && !user) {
+  if (!onlyUnAuth && !user && !accessToken) {
     return <Navigate to={redirectTo} replace state={{ from: location }} />;
   }
   return <Outlet />;
 };
+
 export default ProtectedRoute;

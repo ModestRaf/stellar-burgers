@@ -4,7 +4,8 @@ import {
   nanoid,
   isPending,
   isRejected,
-  PayloadAction
+  PayloadAction,
+  createAction
 } from '@reduxjs/toolkit';
 import { getOrdersApi, orderBurgerApi } from '@api';
 import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
@@ -43,19 +44,36 @@ export const fetchUserOrders = createAsyncThunk<TOrder[], void>(
   'order/fetchUserOrders',
   async () => await getOrdersApi()
 );
+export const addIngredient = createAction(
+  'order/addIngredient',
+  (ingredient: TIngredient) => {
+    const id = nanoid();
+    return {
+      payload: {
+        ...ingredient,
+        id
+      }
+    };
+  }
+);
 
 const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
-    addIngredient: (state, { payload }: { payload: TIngredient }) => {
-      const newIngredient = {
-        ...payload,
-        id: payload.type === 'bun' ? nanoid() : payload._id
-      };
-      payload.type === 'bun'
-        ? (state.constructorItems.bun = newIngredient)
-        : state.constructorItems.ingredients.push(newIngredient);
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TIngredient & { id: string }>) => {
+        const { type, id } = action.payload;
+        if (type === 'bun') {
+          state.constructorItems.bun = action.payload;
+        } else {
+          state.constructorItems.ingredients.push(action.payload);
+        }
+      },
+      prepare: (ingredient: TIngredient) => {
+        const id = nanoid();
+        return { payload: { ...ingredient, id } };
+      }
     },
     deleteIngredient: (state, { payload: index }: PayloadAction<number>) => {
       const { ingredients } = state.constructorItems;
@@ -92,6 +110,5 @@ const orderSlice = createSlice({
   }
 });
 
-export const { addIngredient, closeOrder, deleteIngredient } =
-  orderSlice.actions;
+export const { deleteIngredient, closeOrder } = orderSlice.actions;
 export default orderSlice.reducer;

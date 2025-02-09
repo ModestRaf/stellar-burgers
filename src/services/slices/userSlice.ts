@@ -6,10 +6,12 @@ import {
   registerUserApi,
   updateUserApi,
   logoutApi,
-  getOrdersApi
+  getOrdersApi,
+  getUserApi
 } from '@api';
 import { TOrder, TUser } from '@utils-types';
 import { deleteCookie, setCookie } from '../../utils/cookie';
+import { RootState } from '../store';
 
 type TUserState = {
   isLoading: boolean;
@@ -98,6 +100,18 @@ export const getUserOrders = createAsyncThunk(
   }
 );
 
+export const getUserData = createAsyncThunk(
+  'user/getUserData',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getUserApi();
+      return response.user;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -136,8 +150,23 @@ export const userSlice = createSlice({
         state.accessToken = '';
         localStorage.removeItem('refreshToken');
         deleteCookie('accessToken');
+      })
+      .addCase(getUserData.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(getUserData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(getUserData.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage =
+          action.error.message ?? 'Ошибка загрузки данных пользователя';
       });
   }
 });
 
+export const selectUser = (state: RootState) => state.user.user;
 export default userSlice.reducer;

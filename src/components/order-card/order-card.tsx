@@ -35,16 +35,20 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { ingredients, isLoading } = useSelector((state) => state.ingredients);
+
   useEffect(() => {
     if (!ingredients.length && !isLoading) {
       dispatch(fetchIngredients());
     }
   }, [dispatch, ingredients.length, isLoading]);
+
   const orderInfo = useMemo(
     () => getOrderInfo(order, ingredients),
     [order, ingredients]
   );
+
   if (!orderInfo) return null;
+
   return (
     <OrderCardUI
       orderInfo={orderInfo}

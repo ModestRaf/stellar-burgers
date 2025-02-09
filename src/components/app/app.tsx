@@ -2,7 +2,8 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate
+  useNavigate,
+  useLocation
 } from 'react-router-dom';
 import {
   ConstructorPage,
@@ -24,64 +25,104 @@ import { ReactNode } from 'react';
 interface ModalWithNavigationProps {
   title: string;
   children: ReactNode;
+  onClose: () => void;
 }
 
-const ModalWithNavigation = ({ title, children }: ModalWithNavigationProps) => {
+const ModalWithNavigation = ({
+  title,
+  children,
+  onClose
+}: ModalWithNavigationProps) => (
+  <Modal title={title} onClose={onClose}>
+    {children}
+  </Modal>
+);
+
+const App = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const handleCloseModal = () => {
+  interface LocationState {
+    background?: Location;
+    from?: { pathname: string };
+  }
+  const locationState = location.state as LocationState;
+  const background = locationState?.background;
+  const handleModalClose = () => {
     navigate(-1);
   };
 
   return (
-    <Modal title={title} onClose={handleCloseModal}>
-      {children}
-    </Modal>
-  );
-};
-
-const App = () => (
-  <Router>
     <div className={styles.app}>
       <AppHeader />
-      <Routes>
+      {/* Основные маршруты */}
+      <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
-        <Route
-          path='/feed/:number'
-          element={
-            <ModalWithNavigation title='Детали заказа'>
-              <OrderInfo />
-            </ModalWithNavigation>
-          }
-        />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+
+        {/* Страницы, доступные только НЕавторизованным пользователям */}
+        <Route element={<ProtectedRoute onlyUnAuth redirectTo='/profile' />}>
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/reset-password' element={<ResetPassword />} />
+        </Route>
+
+        {/* Защищенные маршруты (только для авторизованных пользователей) */}
         <Route element={<ProtectedRoute redirectTo='/login' />}>
           <Route path='/profile' element={<Profile />} />
           <Route path='/profile/orders' element={<ProfileOrders />} />
+          <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        </Route>
+
+        <Route path='*' element={<NotFound404 />} />
+      </Routes>
+
+      {/* Маршруты для модальных окон */}
+      {background && (
+        <Routes>
           <Route
-            path='/profile/orders/:number'
+            path='/feed/:number'
             element={
-              <ModalWithNavigation title='Детали заказа'>
+              <ModalWithNavigation
+                title='Детали заказа'
+                onClose={handleModalClose}
+              >
                 <OrderInfo />
               </ModalWithNavigation>
             }
           />
-        </Route>
-        <Route
-          path='/ingredients/:id'
-          element={
-            <ModalWithNavigation title='Детали ингредиента'>
-              <IngredientDetails />
-            </ModalWithNavigation>
-          }
-        />
-        <Route path='*' element={<NotFound404 />} />
-      </Routes>
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ModalWithNavigation
+                title='Детали заказа'
+                onClose={handleModalClose}
+              >
+                <OrderInfo />
+              </ModalWithNavigation>
+            }
+          />
+          <Route
+            path='/ingredients/:id'
+            element={
+              <ModalWithNavigation
+                title='Детали ингредиента'
+                onClose={handleModalClose}
+              >
+                <IngredientDetails />
+              </ModalWithNavigation>
+            }
+          />
+        </Routes>
+      )}
     </div>
+  );
+};
+
+const AppWrapper = () => (
+  <Router>
+    <App />
   </Router>
 );
 
-export default App;
+export default AppWrapper;

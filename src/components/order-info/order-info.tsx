@@ -1,11 +1,12 @@
 import { FC, useMemo, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Preloader } from '@ui';
 import { OrderInfoUI } from '@ui';
 import { TIngredient } from '@utils-types';
 import { useDispatch, useSelector } from '../../services/store';
-import { fetchFeed } from '../../services/slices/feedSlice';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { fetchFeed } from '../../services/slices/feedSlice';
+import { getUserOrders } from '../../services/slices/userSlice';
 
 const getIngredientsInfo = (
   ingredientsIds: string[],
@@ -36,17 +37,34 @@ const getTotalPrice = (
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const { ingredients } = useSelector((state) => state.ingredients);
-  const orderData = useSelector((state) =>
-    state.feed.orders.find((item) => item.number === Number(number))
-  );
+  const { orders: feedOrders } = useSelector((state) => state.feed);
+  const { orders: userOrders } = useSelector((state) => state.user);
+  const isProfilePage = location.pathname.includes('/profile/orders');
+  const orders = isProfilePage ? userOrders : feedOrders;
 
   useEffect(() => {
-    if (!orderData) dispatch(fetchFeed());
-    if (!ingredients.length) dispatch(fetchIngredients());
-  }, [dispatch, orderData, ingredients.length]);
+    if (!ingredients.length) {
+      dispatch(fetchIngredients());
+    }
+    if (!feedOrders.length && !isProfilePage) {
+      dispatch(fetchFeed());
+    }
+    if (!userOrders.length && isProfilePage) {
+      dispatch(getUserOrders());
+    }
+  }, [
+    dispatch,
+    ingredients.length,
+    feedOrders.length,
+    userOrders.length,
+    isProfilePage
+  ]);
+
+  const orderData = orders.find((item) => item.number === Number(number));
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
