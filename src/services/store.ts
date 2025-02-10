@@ -8,6 +8,7 @@ import ingredientsReducer from './slices/ingredientsSlice';
 import newOrderReducer from './slices/orderSlice';
 import feedReducer from './slices/feedSlice';
 import userReducer from './slices/userSlice';
+import { authMiddleware } from './middleware/authMiddleware';
 
 export const rootReducer = combineReducers({
   ingredients: ingredientsReducer,
@@ -18,6 +19,8 @@ export const rootReducer = combineReducers({
 
 const store = configureStore({
   reducer: rootReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(authMiddleware),
   devTools: process.env.NODE_ENV !== 'production'
 });
 

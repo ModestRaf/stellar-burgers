@@ -10,7 +10,6 @@ import {
   getUserApi
 } from '@api';
 import { TOrder, TUser } from '@utils-types';
-import { deleteCookie, setCookie } from '../../utils/cookie';
 import { RootState } from '../store';
 
 type TUserState = {
@@ -28,7 +27,7 @@ const initialState: TUserState = {
   isLoading: false,
   isError: false,
   errorMessage: null,
-  refreshToken: localStorage.getItem('refreshToken') ?? '',
+  refreshToken: '',
   accessToken: '',
   user: null,
   orders: [],
@@ -41,8 +40,6 @@ const handleAuthFulfilled = (state: TUserState, action: any) => {
   state.errorMessage = null;
   state.refreshToken = action.payload.refreshToken;
   state.accessToken = action.payload.accessToken;
-  localStorage.setItem('refreshToken', action.payload.refreshToken);
-  setCookie('accessToken', action.payload.accessToken);
   state.user = action.payload.user;
 };
 
@@ -148,8 +145,7 @@ export const userSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.accessToken = '';
-        localStorage.removeItem('refreshToken');
-        deleteCookie('accessToken');
+        state.refreshToken = ''; // Очищаем refreshToken в состоянии
       })
       .addCase(getUserData.pending, (state) => {
         state.isLoading = true;
