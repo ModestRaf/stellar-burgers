@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch, RootState } from './store';
+import { useSelector } from 'react-redux';
+import { AppDispatch, RootState, useDispatch } from './store';
 import { getUserData } from './slices/userSlice';
 
 interface ProtectedRouteProps {
