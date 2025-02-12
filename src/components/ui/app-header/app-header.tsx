@@ -11,8 +11,11 @@ import { Link, useLocation } from 'react-router-dom';
 
 export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
   const location = useLocation();
+  const isConstructorActive = () =>
+    location.pathname === '/' || location.pathname.startsWith('/ingredients');
+  const isFeedActive = () => location.pathname.startsWith('/feed');
   const isProfileActive = () =>
-    location.pathname === '/profile' || location.pathname === '/login';
+    location.pathname.startsWith('/profile') || location.pathname === '/login';
 
   return (
     <header className={styles.header}>
@@ -20,10 +23,10 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
         <div className={styles.menu_part_left}>
           <Link
             to='/'
-            className={`${styles.link} ${location.pathname === '/' ? styles.link_active : ''}`}
+            className={`${styles.link} ${isConstructorActive() ? styles.link_active : ''}`}
           >
             <BurgerIcon
-              type={location.pathname === '/' ? 'primary' : 'secondary'}
+              type={isConstructorActive() ? 'primary' : 'secondary'}
             />
             <p className='text text_type_main-default ml-2 mr-10'>
               Конструктор
@@ -31,11 +34,9 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
           </Link>
           <Link
             to='/feed'
-            className={`${styles.link} ${location.pathname === '/feed' ? styles.link_active : ''}`}
+            className={`${styles.link} ${isFeedActive() ? styles.link_active : ''}`}
           >
-            <ListIcon
-              type={location.pathname === '/feed' ? 'primary' : 'secondary'}
-            />
+            <ListIcon type={isFeedActive() ? 'primary' : 'secondary'} />
             <p className='text text_type_main-default ml-2'>Лента заказов</p>
           </Link>
         </div>

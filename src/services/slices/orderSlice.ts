@@ -1,11 +1,10 @@
 import {
+  createAction,
   createAsyncThunk,
   createSlice,
-  nanoid,
   isPending,
   isRejected,
-  PayloadAction,
-  createAction
+  PayloadAction
 } from '@reduxjs/toolkit';
 import { getOrdersApi, orderBurgerApi } from '@api';
 import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
@@ -42,18 +41,13 @@ export const orderBurger = createAsyncThunk<TOrder, string[]>(
 
 export const fetchUserOrders = createAsyncThunk<TOrder[], void>(
   'order/fetchUserOrders',
-  async () => {
-    console.log('Вызов API для загрузки заказов');
-    const orders = await getOrdersApi();
-    console.log('Заказы загружены:', orders);
-    return orders;
-  }
+  async () => await getOrdersApi()
 );
 
 export const addIngredient = createAction(
   'order/addIngredient',
   (ingredient: TIngredient) => {
-    const id = nanoid();
+    const id = crypto.randomUUID();
     return {
       payload: {
         ...ingredient,
@@ -69,7 +63,7 @@ const orderSlice = createSlice({
   reducers: {
     addIngredient: {
       reducer: (state, action: PayloadAction<TIngredient & { id: string }>) => {
-        const { type, id } = action.payload;
+        const { type } = action.payload;
         if (type === 'bun') {
           state.constructorItems.bun = action.payload;
         } else {
@@ -77,7 +71,7 @@ const orderSlice = createSlice({
         }
       },
       prepare: (ingredient: TIngredient) => {
-        const id = nanoid();
+        const id = crypto.randomUUID();
         return { payload: { ...ingredient, id } };
       }
     },
@@ -90,6 +84,10 @@ const orderSlice = createSlice({
     },
     closeOrder: (state) => {
       Object.assign(state, initialState);
+    },
+    closeOrderModal: (state) => {
+      state.orderRequest = false;
+      state.orderModalData = null;
     }
   },
   extraReducers: (builder) => {
@@ -99,7 +97,6 @@ const orderSlice = createSlice({
         state.orderModalData = payload;
       })
       .addCase(fetchUserOrders.fulfilled, (state, { payload }) => {
-        console.log('Заказы получены:', payload);
         state.userOrders.isLoading = false;
         state.userOrders.orders = payload;
       })
@@ -116,5 +113,6 @@ const orderSlice = createSlice({
   }
 });
 
-export const { deleteIngredient, closeOrder } = orderSlice.actions;
+export const { deleteIngredient, closeOrder, closeOrderModal } =
+  orderSlice.actions;
 export default orderSlice.reducer;

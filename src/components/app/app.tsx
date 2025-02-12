@@ -20,16 +20,29 @@ import '../../index.css';
 import styles from './app.module.css';
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import ProtectedRoute from '../../services/ProtectedRoute';
+import { FC, useEffect } from 'react';
+import { useDispatch } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import {
+  closeOrderModal,
+  fetchUserOrders
+} from '../../services/slices/orderSlice';
 
-const App = () => {
+const App: FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const background = location.state?.background;
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchIngredients());
+    dispatch(fetchUserOrders());
+    dispatch(closeOrderModal());
+  }, [dispatch, location]);
 
   const handleModalClose = () => {
+    dispatch(closeOrderModal());
     navigate(-1);
   };
-
   return (
     <div className={styles.app}>
       <AppHeader />

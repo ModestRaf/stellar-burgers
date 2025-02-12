@@ -71,9 +71,16 @@ export const register = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk('user/logout', async () => {
-  await logoutApi();
-});
+export const logout = createAsyncThunk(
+  'user/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutApi();
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const updateUserData = createAsyncThunk(
   'user/updateUserData',
@@ -104,9 +111,6 @@ export const getUserData = createAsyncThunk(
       const response = await getUserApi();
       return response.user;
     } catch (error: any) {
-      if (error.status === 401) {
-        localStorage.removeItem('accessToken');
-      }
       return rejectWithValue(error.message);
     }
   }
@@ -133,7 +137,12 @@ export const userSlice = createSlice({
       .addCase(updateUserData.fulfilled, (state, action) => {
         state.user = action.payload.user;
       })
-      .addCase(updateUserData.rejected, handleRejected)
+      .addCase(updateUserData.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage =
+          action.error.message ?? 'Ошибка обновления данных пользователя';
+      })
       .addCase(getUserOrders.pending, (state) => {
         state.orderRequest = true;
       })
@@ -141,14 +150,18 @@ export const userSlice = createSlice({
         state.orderRequest = false;
         state.orders = action.payload;
       })
-      .addCase(getUserOrders.rejected, (state) => {
+      .addCase(getUserOrders.rejected, (state, action) => {
         state.orderRequest = false;
         state.orders = [];
+        state.errorMessage = action.error.message ?? 'Ошибка загрузки заказов';
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.accessToken = '';
         state.refreshToken = '';
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.errorMessage = action.error.message ?? 'Ошибка выхода';
       })
       .addCase(getUserData.pending, (state) => {
         state.isLoading = true;
