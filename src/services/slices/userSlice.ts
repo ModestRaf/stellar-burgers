@@ -104,6 +104,9 @@ export const getUserData = createAsyncThunk(
       const response = await getUserApi();
       return response.user;
     } catch (error: any) {
+      if (error.status === 401) {
+        localStorage.removeItem('accessToken');
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -145,7 +148,7 @@ export const userSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.accessToken = '';
-        state.refreshToken = ''; // Очищаем refreshToken в состоянии
+        state.refreshToken = '';
       })
       .addCase(getUserData.pending, (state) => {
         state.isLoading = true;
@@ -160,6 +163,7 @@ export const userSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.error.message ?? 'Ошибка загрузки данных пользователя';
+        state.user = null;
       });
   }
 });

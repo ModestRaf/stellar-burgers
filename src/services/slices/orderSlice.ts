@@ -42,8 +42,14 @@ export const orderBurger = createAsyncThunk<TOrder, string[]>(
 
 export const fetchUserOrders = createAsyncThunk<TOrder[], void>(
   'order/fetchUserOrders',
-  async () => await getOrdersApi()
+  async () => {
+    console.log('Вызов API для загрузки заказов');
+    const orders = await getOrdersApi();
+    console.log('Заказы загружены:', orders);
+    return orders;
+  }
 );
+
 export const addIngredient = createAction(
   'order/addIngredient',
   (ingredient: TIngredient) => {
@@ -93,7 +99,7 @@ const orderSlice = createSlice({
         state.orderModalData = payload;
       })
       .addCase(fetchUserOrders.fulfilled, (state, { payload }) => {
-        console.log('Orders fetched successfully:', payload);
+        console.log('Заказы получены:', payload);
         state.userOrders.isLoading = false;
         state.userOrders.orders = payload;
       })
