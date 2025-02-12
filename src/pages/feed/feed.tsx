@@ -13,22 +13,27 @@ export const Feed: FC = () => {
   const { ingredients, isLoading: isIngredientsLoading } = useSelector(
     (state) => state.ingredients
   );
+
   useEffect(() => {
-    dispatch(fetchFeed())
-      .unwrap()
-      .then((data) => console.log('Feed data loaded:', data))
-      .catch((error) => console.error('Failed to load feed data:', error));
+    if (!orders.length && !isFeedLoading) {
+      dispatch(fetchFeed()).catch((error) => console.error(error));
+    }
 
     if (!ingredients.length && !isIngredientsLoading) {
-      dispatch(fetchIngredients())
-        .unwrap()
-        .then((data) => console.log('Ingredients loaded:', data))
-        .catch((error) => console.error('Failed to load ingredients:', error));
+      dispatch(fetchIngredients()).catch((error) => console.error(error));
     }
-  }, [dispatch, ingredients.length, isIngredientsLoading]);
+  }, [
+    dispatch,
+    orders.length,
+    isFeedLoading,
+    ingredients.length,
+    isIngredientsLoading
+  ]);
+
   if (isFeedLoading || isIngredientsLoading) {
     return <Preloader />;
   }
+
   return (
     <FeedUI orders={orders} handleGetFeeds={() => dispatch(fetchFeed())} />
   );
