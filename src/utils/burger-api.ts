@@ -137,7 +137,7 @@ export type TRegisterData = {
   password: string;
 };
 
-type TAuthResponse = TServerResponse<{
+export type TAuthResponse = TServerResponse<{
   refreshToken: string;
   accessToken: string;
   user: TUser;
@@ -211,6 +211,9 @@ export const getUserApi = () =>
     headers: {
       authorization: getCookie('accessToken')
     } as HeadersInit
+  }).then((data) => {
+    console.log('Данные пользователя загружены:', data);
+    return data;
   });
 
 export const updateUserApi = (user: Partial<TRegisterData>) =>

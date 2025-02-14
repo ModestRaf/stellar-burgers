@@ -1,55 +1,80 @@
-import { FC, useMemo } from 'react';
-import { Preloader } from '../ui/preloader';
-import { OrderInfoUI } from '../ui/order-info';
+import { FC, useMemo, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import { Preloader } from '@ui';
+import { OrderInfoUI } from '@ui';
 import { TIngredient } from '@utils-types';
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { fetchFeed } from '../../services/slices/feedSlice';
+import { getUserOrders } from '../../services/slices/userSlice';
+
+const getIngredientsInfo = (
+  ingredientsIds: string[],
+  ingredients: TIngredient[]
+) =>
+  ingredientsIds.reduce<Record<string, TIngredient & { count: number }>>(
+    (acc, item) => {
+      if (!acc[item]) {
+        const ingredient = ingredients.find((ing) => ing._id === item);
+        if (ingredient) {
+          acc[item] = { ...ingredient, count: 1 };
+        }
+      } else {
+        acc[item].count++;
+      }
+      return acc;
+    },
+    {}
+  );
+
+const getTotalPrice = (
+  ingredientsInfo: Record<string, TIngredient & { count: number }>
+) =>
+  Object.values(ingredientsInfo).reduce(
+    (acc, item) => acc + item.price * item.count,
+    0
+  );
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const { number } = useParams<{ number: string }>();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-  const ingredients: TIngredient[] = [];
+  const { ingredients } = useSelector((state) => state.ingredients);
+  const { orders: feedOrders } = useSelector((state) => state.feed);
+  const { orders: userOrders } = useSelector((state) => state.user);
+  const isProfilePage = location.pathname.includes('/profile/orders');
+  const orders = isProfilePage ? userOrders : feedOrders;
 
-  /* Готовим данные для отображения */
+  useEffect(() => {
+    if (!ingredients.length) {
+      dispatch(fetchIngredients());
+    }
+    if (!feedOrders.length && !isProfilePage) {
+      dispatch(fetchFeed());
+    }
+    if (!userOrders.length && isProfilePage) {
+      dispatch(getUserOrders());
+    }
+  }, [
+    dispatch,
+    ingredients.length,
+    feedOrders.length,
+    userOrders.length,
+    isProfilePage
+  ]);
+
+  const orderData = orders.find((item) => item.number === Number(number));
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
     const date = new Date(orderData.createdAt);
-
-    type TIngredientsWithCount = {
-      [key: string]: TIngredient & { count: number };
-    };
-
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
-        if (!acc[item]) {
-          const ingredient = ingredients.find((ing) => ing._id === item);
-          if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
-          }
-        } else {
-          acc[item].count++;
-        }
-
-        return acc;
-      },
-      {}
+    const ingredientsInfo = getIngredientsInfo(
+      orderData.ingredients,
+      ingredients
     );
-
-    const total = Object.values(ingredientsInfo).reduce(
-      (acc, item) => acc + item.price * item.count,
-      0
-    );
+    const total = getTotalPrice(ingredientsInfo);
 
     return {
       ...orderData,
