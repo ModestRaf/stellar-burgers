@@ -4,10 +4,10 @@ import {
   useDispatch as dispatchHook,
   useSelector as selectorHook
 } from 'react-redux';
-import ingredientsReducer from './slices/ingredientsSlice';
-import newOrderReducer from './slices/orderSlice';
-import feedReducer from './slices/feedSlice';
-import userReducer from './slices/userSlice';
+import ingredientsReducer from './slices/ingredientsSlice/ingredientsSlice';
+import newOrderReducer from './slices/orderSlice/orderSlice';
+import feedReducer from './slices/feedSlice/feedSlice';
+import userReducer from './slices/userSlice/userSlice';
 import { authMiddleware } from './middleware/authMiddleware';
 
 export const rootReducer = combineReducers({

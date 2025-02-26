@@ -22,11 +22,11 @@ import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import ProtectedRoute from '../../services/ProtectedRoute';
 import { FC, useEffect } from 'react';
 import { useDispatch } from '../../services/store';
-import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice/ingredientsSlice';
 import {
   closeOrderModal,
   fetchUserOrders
-} from '../../services/slices/orderSlice';
+} from '../../services/slices/orderSlice/orderSlice';
 
 const App: FC = () => {
   const location = useLocation();

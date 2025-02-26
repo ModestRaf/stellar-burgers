@@ -1,8 +1,11 @@
 import { FC, useMemo, useCallback } from 'react';
 import { BurgerConstructorUI } from '@ui';
 import { useSelector, useDispatch } from '../../services/store';
-import { closeOrder, orderBurger } from '../../services/slices/orderSlice';
-import { selectUser } from '../../services/slices/userSlice';
+import {
+  closeOrder,
+  orderBurger
+} from '../../services/slices/orderSlice/orderSlice';
+import { selectUser } from '../../services/slices/userSlice/userSlice';
 import { useNavigate } from 'react-router-dom';
 
 export const BurgerConstructor: FC = () => {
