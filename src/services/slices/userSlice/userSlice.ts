@@ -10,7 +10,7 @@ import {
   getUserApi
 } from '@api';
 import { TOrder, TUser } from '@utils-types';
-import { RootState } from '../store';
+import { RootState } from '../../store';
 
 type TUserState = {
   isLoading: boolean;

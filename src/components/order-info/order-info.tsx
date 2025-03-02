@@ -4,9 +4,9 @@ import { Preloader } from '@ui';
 import { OrderInfoUI } from '@ui';
 import { TIngredient } from '@utils-types';
 import { useDispatch, useSelector } from '../../services/store';
-import { fetchIngredients } from '../../services/slices/ingredientsSlice';
-import { fetchFeed } from '../../services/slices/feedSlice';
-import { getUserOrders } from '../../services/slices/userSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice/ingredientsSlice';
+import { fetchFeed } from '../../services/slices/feedSlice/feedSlice';
+import { getUserOrders } from '../../services/slices/userSlice/userSlice';
 
 const getIngredientsInfo = (
   ingredientsIds: string[],

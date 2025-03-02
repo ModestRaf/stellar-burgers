@@ -80,7 +80,10 @@ const orderSlice = createSlice({
       if (!ingredients[index]) {
         throw new Error('Error');
       }
-      state.constructorItems.ingredients = ingredients.toSpliced(index, 1);
+      state.constructorItems.ingredients = [
+        ...ingredients.slice(0, index),
+        ...ingredients.slice(index + 1)
+      ];
     },
     closeOrder: (state) => {
       Object.assign(state, initialState);

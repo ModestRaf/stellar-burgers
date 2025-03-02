@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { AppDispatch, RootState, useDispatch, useSelector } from './store';
-import { getUserData } from './slices/userSlice';
+import { getUserData } from './slices/userSlice/userSlice';
 
 interface ProtectedRouteProps {
   onlyUnAuth?: boolean;
